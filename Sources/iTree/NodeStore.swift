@@ -5,19 +5,25 @@
 //  Created by Nail Sharipov on 24.02.2024.
 //
 
+@usableFromInline
 struct NodeStore<T> {
-    
-    var buffer: [TreeNode<T>]
-    private var unused: [UInt32]
-    private let empty: T
 
+    @usableFromInline
+    var buffer: [TreeNode<T>]
+    @usableFromInline
+    var unused: [UInt32]
+    @usableFromInline
+    let empty: T
+
+    @inlinable
     init(empty: T, capacity: Int) {
         self.empty = empty
         self.buffer = [TreeNode]()
         self.unused = [UInt32]()
         self.reserve(length: capacity)
     }
-    
+
+    @inlinable
     mutating func getFreeIndex() -> UInt32 {
         if unused.isEmpty {
             self.reserve(length: 16)
@@ -25,6 +31,7 @@ struct NodeStore<T> {
         return self.unused.removeLast()
     }
     
+    @inlinable
     mutating func getFree() -> TreeNode<T> {
         if unused.isEmpty {
             self.reserve(length: 16)
@@ -39,11 +46,13 @@ struct NodeStore<T> {
         return node
     }
     
+    @inlinable
     mutating func putBack(index: UInt32) {
         self.unused.append(index)
     }
     
-    mutating private func reserve(length: Int) {
+    @inlinable
+    mutating func reserve(length: Int) {
         let n = UInt32(buffer.count)
         let l = UInt32(length)
         for i in 0..<l {

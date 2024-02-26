@@ -7,10 +7,15 @@
 
 public struct RBTree<T: Comparable> {
     
-    private var store: NodeStore<T>
-    private let emptyIndex: UInt32
-    public private (set) var root: UInt32
+    @usableFromInline
+    var store: NodeStore<T>
     
+    @usableFromInline
+    let emptyIndex: UInt32
+    
+    public var root: UInt32
+    
+    @inlinable
     public subscript(index: UInt32) -> TreeNode<T> {
         get {
             store.buffer[Int(index)]
@@ -20,15 +25,18 @@ public struct RBTree<T: Comparable> {
         }
     }
     
-    private mutating func save(_ n: TreeNode<T>) {
+    @inlinable
+    mutating func save(_ n: TreeNode<T>) {
         store.buffer[Int(n.index)] = n
     }
     
-    private func isBlack(_ index: UInt32) -> Bool {
+    @inlinable
+    func isBlack(_ index: UInt32) -> Bool {
         index == .empty || index != .empty && store.buffer[Int(index)].color == .black
     }
     
-    private mutating func createNilNode(parent: UInt32) -> UInt32 {
+    @inlinable
+    mutating func createNilNode(parent: UInt32) -> UInt32 {
         var node = store.buffer[Int(self.emptyIndex)]
         node.parent = parent
         node.left = .empty
@@ -39,12 +47,14 @@ public struct RBTree<T: Comparable> {
     }
 
 #if DEBUG
+    @inlinable
     public init(empty: T, capacity: Int = 8) {
         self.store = NodeStore(empty: empty, capacity: capacity)
         self.emptyIndex = store.getFreeIndex() // must be 0
         self.root = .empty
     }
 #else
+    @inlinable
     public init(empty: T, capacity: Int = 32) {
         self.store = NodeStore(empty: empty, capacity: capacity)
         self.emptyIndex = store.getFreeIndex() // must be 0
@@ -52,7 +62,8 @@ public struct RBTree<T: Comparable> {
     }
 #endif
 
-    private mutating func rotateRight(_ index: UInt32) {
+    @inlinable
+    mutating func rotateRight(_ index: UInt32) {
         var n = self[index]
         let p = n.parent
         let l = self[n.left]
@@ -72,7 +83,8 @@ public struct RBTree<T: Comparable> {
         self.replaceParentsChild(p, oldChild: n.index, newChild: l.index)
     }
     
-    private mutating func rotateLeft(_ index: UInt32) {
+    @inlinable
+    mutating func rotateLeft(_ index: UInt32) {
         var n = self[index]
         let p = n.parent
         let r = self[n.right]
@@ -92,7 +104,8 @@ public struct RBTree<T: Comparable> {
         self.replaceParentsChild(p, oldChild: n.index, newChild: r.index)
     }
     
-    private mutating func replaceParentsChild(_ parent: UInt32, oldChild: UInt32, newChild: UInt32) {
+    @inlinable
+    mutating func replaceParentsChild(_ parent: UInt32, oldChild: UInt32, newChild: UInt32) {
         guard parent != .empty else {
             root = newChild
             self[newChild].parent = .empty
@@ -112,7 +125,8 @@ public struct RBTree<T: Comparable> {
         self[newChild].parent = parent
     }
     
-    private mutating func replaceParentsChild(_ parent: UInt32, oldChild: UInt32) {
+    @inlinable
+    mutating func replaceParentsChild(_ parent: UInt32, oldChild: UInt32) {
         var p = self[parent]
         assert(p.left == oldChild || p.right == oldChild, "Node is not a child of its parent")
         
@@ -125,6 +139,7 @@ public struct RBTree<T: Comparable> {
         self[parent] = p
     }
     
+    @inlinable
     public mutating func insert(value: T) {
         var newNode = self.store.getFree()
         newNode.value = value
@@ -167,7 +182,8 @@ public struct RBTree<T: Comparable> {
         }
     }
     
-    mutating private func fixRedBlackPropertiesAfterInsert(nIndex: UInt32, pIndex: UInt32) {
+    @inlinable
+    mutating func fixRedBlackPropertiesAfterInsert(nIndex: UInt32, pIndex: UInt32) {
         // parent is red!
         var pIndex = pIndex
         let parent = self[pIndex]
@@ -234,7 +250,8 @@ public struct RBTree<T: Comparable> {
         }
     }
     
-    private func getUncle(pIndex: UInt32) -> UInt32 {
+    @inlinable
+    func getUncle(pIndex: UInt32) -> UInt32 {
         let parent = self[pIndex]
         guard parent.parent != .empty else {
             return .empty
@@ -251,6 +268,7 @@ public struct RBTree<T: Comparable> {
         }
     }
     
+    @inlinable
     public mutating func delete(value: T) {
         var index = root
         // Find the node to be deleted
@@ -273,6 +291,7 @@ public struct RBTree<T: Comparable> {
         self.delete(index: index)
     }
     
+    @inlinable
     public mutating func delete(index: UInt32) {
         
         // In this variable, we'll store the node at which we're going to start to fix the R-B
@@ -317,8 +336,8 @@ public struct RBTree<T: Comparable> {
         }
     }
     
-    
-    mutating private func deleteNodeWithZeroOrOneChild(_ nIndex: UInt32) -> UInt32 {
+    @inlinable
+    mutating func deleteNodeWithZeroOrOneChild(_ nIndex: UInt32) -> UInt32 {
         let node = self[nIndex]
         if node.left != .empty {
             // Node has ONLY a left child --> replace by its left child
@@ -349,7 +368,8 @@ public struct RBTree<T: Comparable> {
         }
     }
     
-    private mutating func fixRedBlackPropertiesAfterDelete(_ nIndex: UInt32) {
+    @inlinable
+    mutating func fixRedBlackPropertiesAfterDelete(_ nIndex: UInt32) {
         // Case 1: Examined node is root, end of recursion
         guard nIndex != root else {
             // Uncomment the following line if you want to enforce black roots (rule 2):
@@ -385,7 +405,8 @@ public struct RBTree<T: Comparable> {
         }
     }
     
-    mutating private func handleBlackSiblingWithAtLeastOneRedChild(_ nIndex: UInt32, _ sIndex: UInt32) {
+    @inlinable
+    mutating func handleBlackSiblingWithAtLeastOneRedChild(_ nIndex: UInt32, _ sIndex: UInt32) {
         var sIndex = sIndex
         let pIndex = self[nIndex].parent
         var sibling = self[sIndex]
@@ -430,7 +451,8 @@ public struct RBTree<T: Comparable> {
         }
     }
     
-    mutating private func handleRedSibling(_ nIndex: UInt32, _ sIndex: UInt32) {
+    @inlinable
+    mutating func handleRedSibling(_ nIndex: UInt32, _ sIndex: UInt32) {
         // Recolor...
         
         self[sIndex].color = .black
@@ -446,7 +468,8 @@ public struct RBTree<T: Comparable> {
         }
     }
     
-    private func getSibling(_ nIndex: UInt32) -> UInt32 {
+    @inlinable
+    func getSibling(_ nIndex: UInt32) -> UInt32 {
         let pIndex = self[nIndex].parent
         let parent = self[pIndex]
         assert(nIndex == parent.left || nIndex == parent.right)
@@ -457,7 +480,8 @@ public struct RBTree<T: Comparable> {
         }
     }
     
-    private func findMinimum(_ nIndex: UInt32) -> TreeNode<T> {
+    @inlinable
+    func findMinimum(_ nIndex: UInt32) -> TreeNode<T> {
         var i = nIndex
         var j = UInt32.max
         repeat {
@@ -468,6 +492,7 @@ public struct RBTree<T: Comparable> {
         return self[j]
     }
     
+    @inlinable
     public func find(value: T) -> T? {
         var index = root
 
