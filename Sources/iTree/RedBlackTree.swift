@@ -305,22 +305,20 @@ public struct RBTree<T: Comparable> {
         if node.left == .empty || node.right == .empty {
             deletedNodeColor = node.color
             movedUpNode = deleteNodeWithZeroOrOneChild(node.index)
-            self.store.putBack(index: index)
         } else {
             // Node has two children
             // Find minimum node of right subtree ("inorder successor" of current node)
-            let inOrderSuccessor = findMinimum(node.right)
-            deletedNodeColor = inOrderSuccessor.color
+            let successorIndex = findMinimum(node.right)
+            let successor = self[successorIndex]
+            deletedNodeColor = successor.color
             
-            // Copy inorder successor's data to current node (keep its color!)
-            self[index].value = inOrderSuccessor.value
+            // Copy inorder minNode's data to current node (keep its color!)
+            self[index].value = successor.value
 
             // Delete inorder successor just as we would delete a node with 0 or 1 child
-            movedUpNode = deleteNodeWithZeroOrOneChild(inOrderSuccessor.index)
-            self.store.putBack(index: inOrderSuccessor.index)
+            movedUpNode = deleteNodeWithZeroOrOneChild(successorIndex)
         }
 
-        // TODO case where movedUpNode == nil
         guard movedUpNode != .empty, deletedNodeColor == .black else {
             return
         }
@@ -338,6 +336,7 @@ public struct RBTree<T: Comparable> {
     
     @inlinable
     mutating func deleteNodeWithZeroOrOneChild(_ nIndex: UInt32) -> UInt32 {
+        self.store.putBack(index: nIndex)
         let node = self[nIndex]
         if node.left != .empty {
             // Node has ONLY a left child --> replace by its left child
@@ -372,8 +371,7 @@ public struct RBTree<T: Comparable> {
     mutating func fixRedBlackPropertiesAfterDelete(_ nIndex: UInt32) {
         // Case 1: Examined node is root, end of recursion
         guard nIndex != root else {
-            // Uncomment the following line if you want to enforce black roots (rule 2):
-            // node.color = BLACK;
+            // do not color root to black
             return
         }
 
@@ -481,15 +479,13 @@ public struct RBTree<T: Comparable> {
     }
     
     @inlinable
-    func findMinimum(_ nIndex: UInt32) -> TreeNode<T> {
+    func findMinimum(_ nIndex: UInt32) -> UInt32 {
         var i = nIndex
-        var j = UInt32.max
-        repeat {
-            j = i
+        while self[i].left != .empty {
             i = self[i].left
-        } while i != .empty
+        }
         
-        return self[j]
+        return i
     }
     
     @inlinable
