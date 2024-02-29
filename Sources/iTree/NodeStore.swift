@@ -5,8 +5,7 @@
 //  Created by Nail Sharipov on 24.02.2024.
 //
 
-@usableFromInline
-struct NodeStore<T> {
+public struct NodeStore<T> {
 
     @usableFromInline
     var buffer: [TreeNode<T>]
@@ -32,7 +31,7 @@ struct NodeStore<T> {
     }
     
     @inlinable
-    mutating func getFree() -> TreeNode<T> {
+    public mutating func getFree(value: T) -> TreeNode<T> {
         if unused.isEmpty {
             self.reserve(length: 16)
         }
@@ -42,12 +41,14 @@ struct NodeStore<T> {
         node.left = .empty
         node.right = .empty
         node.parent = .empty
+        node.color = .red
+        node.value = value
         
         return node
     }
     
     @inlinable
-    mutating func putBack(index: UInt32) {
+    public mutating func putBack(index: UInt32) {
         self.unused.append(index)
     }
     

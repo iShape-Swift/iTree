@@ -256,6 +256,21 @@ final class iTreeTests: XCTestCase {
         }
     }
     
+    func test_16() throws {
+        var tree = RBTree(empty: 0)
+        let values = [4, 1, 6, 3, 2, 5]
+        for value in values {
+            tree.insert(value: value)
+            XCTAssertTrue(tree.verifyRedProperty(tree.root), "Red node property violated after rotations.")
+            XCTAssertTrue(tree.verifyBlackHeightConsistency(tree.root), "Black height inconsistent after deletion.")
+        }
+        for i in 0...1 {
+            tree.delete(value: values[i])
+            XCTAssertTrue(tree.verifyRedProperty(tree.root), "Red node property violated after rotations.")
+            XCTAssertTrue(tree.verifyBlackHeightConsistency(tree.root), "Black height inconsistent after deletion.")
+        }
+    }
+    
     func test_17() throws {
         var tree = RBTree(empty: 0)
         // [6, 7, 2, 1, 4, 3, 5]

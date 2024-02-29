@@ -5,8 +5,7 @@
 //  Created by Nail Sharipov on 24.02.2024.
 //
 
-@usableFromInline
-enum NodeColor: UInt8 {
+public enum NodeColor: UInt8 {
     case red
     case black
 }
@@ -18,9 +17,8 @@ public struct TreeNode<T> {
     
     public var left: UInt32
     public var right: UInt32
-    
-    @usableFromInline
-    var color: NodeColor
+
+    public var color: NodeColor
     
     public var value: T
     

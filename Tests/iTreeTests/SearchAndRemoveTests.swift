@@ -35,8 +35,6 @@ final class SearchAndRemoveTests: XCTestCase {
 
         tree.delete(value: TimeNode(time: 0, value: 10))
     }
-    
-    
 }
 
 extension RBTree where T == TimeNode {
@@ -65,9 +63,7 @@ extension RBTree where T == TimeNode {
         
         return nil
     }
-    
 }
-
 
 struct TimeNode {
     let time: Int

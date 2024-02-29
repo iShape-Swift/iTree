@@ -7,8 +7,7 @@
 
 public struct RBTree<T: Comparable> {
     
-    @usableFromInline
-    var store: NodeStore<T>
+    public var store: NodeStore<T>
     
     @usableFromInline
     let emptyIndex: UInt32
@@ -26,7 +25,7 @@ public struct RBTree<T: Comparable> {
     }
     
     @inlinable
-    mutating func save(_ n: TreeNode<T>) {
+    public mutating func save(_ n: TreeNode<T>) {
         store.buffer[Int(n.index)] = n
     }
     
@@ -41,7 +40,7 @@ public struct RBTree<T: Comparable> {
         node.parent = parent
         node.left = .empty
         node.right = .empty
-        node.color = .black
+        node.color = .red
         
         return node.index
     }
@@ -141,11 +140,10 @@ public struct RBTree<T: Comparable> {
     
     @inlinable
     public mutating func insert(value: T) {
-        var newNode = self.store.getFree()
-        newNode.value = value
-        newNode.color = .red
-        
         guard self.root != .empty else {
+            var newNode = self.store.getFree(value: value)
+            newNode.value = value
+            newNode.color = .black
             self.save(newNode)
             self.root = newNode.index
             return
@@ -153,37 +151,38 @@ public struct RBTree<T: Comparable> {
         
         var index = root
         var pIndex = root
+        var isLeft = false
+        
         repeat {
             let node = self[index]
             pIndex = index
             assert(node.value != value)
             
-            if value < node.value {
-                index = node.left
+            isLeft = value < node.value
+            if isLeft {
+                isLeft = true
             } else {
                 index = node.right
             }
         } while index != .empty
 
-        var parent = self[pIndex]
-        
-        if value < parent.value {
-            parent.left = newNode.index
-        } else {
-            parent.right = newNode.index
-        }
+        var newNode = self.store.getFree(value: value)
         newNode.parent = pIndex
-        
         self.save(newNode)
-        self.save(parent)
 
-        if parent.color == .red {
+        if isLeft {
+            self[pIndex].left = index
+        } else {
+            self[pIndex].right = index
+        }
+        
+        if self[pIndex].color == .red {
             fixRedBlackPropertiesAfterInsert(nIndex: newNode.index, pIndex: pIndex)
         }
     }
     
     @inlinable
-    mutating func fixRedBlackPropertiesAfterInsert(nIndex: UInt32, pIndex: UInt32) {
+    public mutating func fixRedBlackPropertiesAfterInsert(nIndex: UInt32, pIndex: UInt32) {
         // parent is red!
         var pIndex = pIndex
         let parent = self[pIndex]
@@ -293,31 +292,68 @@ public struct RBTree<T: Comparable> {
     
     @inlinable
     public mutating func delete(index: UInt32) {
-        
-        // In this variable, we'll store the node at which we're going to start to fix the R-B
-        // properties after deleting a node.
-        let movedUpNode: UInt32
-        let deletedNodeColor: NodeColor
 
         let node = self[index]
         
-        // Node has zero or one child
-        if node.left == .empty || node.right == .empty {
-            deletedNodeColor = node.color
-            movedUpNode = deleteNodeWithZeroOrOneChild(node.index)
-        } else {
+        if node.left != .empty && node.right != .empty {
             // Node has two children
             // Find minimum node of right subtree ("inorder successor" of current node)
             let successorIndex = findMinimum(node.right)
-            let successor = self[successorIndex]
-            deletedNodeColor = successor.color
+            var successor = self[successorIndex]
             
-            // Copy inorder minNode's data to current node (keep its color!)
-            self[index].value = successor.value
+            // replace fey and successor
+            
+            var fey = TreeNode(
+                index: index,
+                parent: .empty,
+                left: .empty,
+                right: .empty,
+                color: successor.color,
+                value: node.value
+            )
+            if successor.right != .empty {
+                fey.right = successor.right
+                self[fey.right].parent = index
+            }
+            
+            if node.right == successorIndex {
+                fey.parent = successorIndex
+                successor.right = index
+            } else {
+                fey.parent = successor.parent
+                if self[fey.parent].left == successorIndex {
+                    self[fey.parent].left = index
+                } else {
+                    self[fey.parent].right = index
+                }
+                
+                successor.right = node.right
+                self[node.right].parent = successorIndex
+            }
 
-            // Delete inorder successor just as we would delete a node with 0 or 1 child
-            movedUpNode = deleteNodeWithZeroOrOneChild(successorIndex)
+            successor.color = node.color
+            successor.left = node.left
+            successor.parent = node.parent
+            
+            if node.parent == .empty {
+                root = successorIndex
+            } else {
+                if self[node.parent].left == index {
+                    self[node.parent].left = successorIndex
+                } else {
+                    self[node.parent].right = successorIndex
+                }
+            }
+
+            self[node.left].parent = successorIndex
+            self[successorIndex] = successor
+            self[index] = fey
         }
+                
+        let deletedNodeColor = self[index].color
+        self.store.putBack(index: index)
+        
+        let movedUpNode = deleteNodeWithZeroOrOneChild(index)
 
         guard movedUpNode != .empty, deletedNodeColor == .black else {
             return
@@ -336,7 +372,6 @@ public struct RBTree<T: Comparable> {
     
     @inlinable
     mutating func deleteNodeWithZeroOrOneChild(_ nIndex: UInt32) -> UInt32 {
-        self.store.putBack(index: nIndex)
         let node = self[nIndex]
         if node.left != .empty {
             // Node has ONLY a left child --> replace by its left child
