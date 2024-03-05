@@ -12,7 +12,6 @@ public enum NodeColor: UInt8 {
 
 public struct TreeNode<T> {
 
-    public let index: UInt32
     public var parent: UInt32
     
     public var left: UInt32
@@ -23,8 +22,7 @@ public struct TreeNode<T> {
     public var value: T
     
     @usableFromInline
-    init(index: UInt32, parent: UInt32, left: UInt32, right: UInt32, color: NodeColor, value: T) {
-        self.index = index
+    init(parent: UInt32, left: UInt32, right: UInt32, color: NodeColor, value: T) {
         self.parent = parent
         self.left = left
         self.right = right

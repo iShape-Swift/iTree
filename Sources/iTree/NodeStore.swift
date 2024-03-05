@@ -31,20 +31,6 @@ public struct NodeStore<T> {
     }
     
     @inlinable
-    public mutating func getFree(value: T) -> TreeNode<T> {
-        let index = Int(self.getFreeIndex())
-        
-        var node = buffer[index]
-        node.left = .empty
-        node.right = .empty
-        node.parent = .empty
-        node.color = .red
-        node.value = value
-        
-        return node
-    }
-    
-    @inlinable
     public mutating func putBack(index: UInt32) {
         self.unused.append(index)
     }
@@ -54,8 +40,7 @@ public struct NodeStore<T> {
         let n = UInt32(buffer.count)
         let l = UInt32(length)
         for i in 0..<l {
-            let index = n + i
-            let node = TreeNode<T>(index: index, parent: .empty, left: .empty, right: .empty, color: .red, value: self.empty)
+            let node = TreeNode<T>(parent: .empty, left: .empty, right: .empty, color: .red, value: self.empty)
             buffer.append(node)
             unused.append(n + l - i - 1)
         }

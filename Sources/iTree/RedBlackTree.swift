@@ -10,7 +10,7 @@ public struct RBTree<T: Comparable> {
     public var store: NodeStore<T>
     
     @usableFromInline
-    let emptyIndex: UInt32
+    let nilIndex: UInt32
     
     public var root: UInt32
     
@@ -25,38 +25,32 @@ public struct RBTree<T: Comparable> {
     }
     
     @inlinable
-    public mutating func save(_ n: TreeNode<T>) {
-        store.buffer[Int(n.index)] = n
-    }
-    
-    @inlinable
     func isBlack(_ index: UInt32) -> Bool {
         index == .empty || index != .empty && store.buffer[Int(index)].color == .black
     }
     
     @inlinable
-    mutating func createNilNode(parent: UInt32) -> UInt32 {
-        var node = store.buffer[Int(self.emptyIndex)]
+    mutating func createNilNode(parent: UInt32) {
+        var node = store.buffer[Int(self.nilIndex)]
         node.parent = parent
         node.left = .empty
         node.right = .empty
         node.color = .red
-        
-        return node.index
     }
 
 #if DEBUG
     @inlinable
     public init(empty: T, capacity: Int = 8) {
         self.store = NodeStore(empty: empty, capacity: capacity)
-        self.emptyIndex = store.getFreeIndex() // must be 0
+        self.nilIndex = store.getFreeIndex()
+        assert(nilIndex == 0)
         self.root = .empty
     }
 #else
     @inlinable
     public init(empty: T, capacity: Int = 32) {
         self.store = NodeStore(empty: empty, capacity: capacity)
-        self.emptyIndex = store.getFreeIndex() // must be 0
+        self.nilIndex = store.getFreeIndex()
         self.root = .empty
     }
 #endif
@@ -65,7 +59,9 @@ public struct RBTree<T: Comparable> {
     mutating func rotateRight(_ index: UInt32) {
         var n = self[index]
         let p = n.parent
-        let l = self[n.left]
+        
+        let ltIndex = n.left
+        let l = self[ltIndex]
         
         if l.right != .empty {
             n.left = l.right
@@ -74,19 +70,21 @@ public struct RBTree<T: Comparable> {
             n.left = .empty
         }
         
-        self[l.index].right = index
-        n.parent = l.index
+        self[ltIndex].right = index
+        n.parent = ltIndex
         
-        self.save(n)
+        self[index] = n
         
-        self.replaceParentsChild(p, oldChild: n.index, newChild: l.index)
+        self.replaceParentsChild(p, oldChild: index, newChild: ltIndex)
     }
     
     @inlinable
     mutating func rotateLeft(_ index: UInt32) {
         var n = self[index]
         let p = n.parent
-        let r = self[n.right]
+        
+        let rtIndex = n.right
+        let r = self[rtIndex]
         
         if r.left != .empty {
             n.right = r.left
@@ -95,12 +93,12 @@ public struct RBTree<T: Comparable> {
             n.right = .empty
         }
         
-        self[r.index].left = index
-        n.parent = r.index
+        self[rtIndex].left = index
+        n.parent = rtIndex
         
-        self.save(n)
+        self[index] = n
         
-        self.replaceParentsChild(p, oldChild: n.index, newChild: r.index)
+        self.replaceParentsChild(p, oldChild: index, newChild: rtIndex)
     }
     
     @inlinable
@@ -141,11 +139,15 @@ public struct RBTree<T: Comparable> {
     @inlinable
     public mutating func insert(value: T) {
         guard self.root != .empty else {
-            var newNode = self.store.getFree(value: value)
-            newNode.value = value
+            let newIndex = self.store.getFreeIndex()
+            var newNode = self[newIndex]
+            newNode.parent = .empty
+            newNode.left = .empty
+            newNode.right = .empty
             newNode.color = .black
-            self.save(newNode)
-            self.root = newNode.index
+            newNode.value = value
+            self[newIndex] = newNode
+            self.root = newIndex
             return
         }
         
@@ -183,7 +185,7 @@ public struct RBTree<T: Comparable> {
         }
         
         if self[pIndex].color == .red {
-            fixRedBlackPropertiesAfterInsert(nIndex: newNode.index, pIndex: pIndex)
+            fixRedBlackPropertiesAfterInsert(nIndex: newIndex, pIndex: pIndex)
         }
     }
     
@@ -309,7 +311,7 @@ public struct RBTree<T: Comparable> {
         // Node has zero or one child
         if isSingle {
             deletedNodeColor = node.color
-            movedUpNode = deleteNodeWithZeroOrOneChild(node.index)
+            movedUpNode = deleteNodeWithZeroOrOneChild(index)
         } else {
             let successorIndex = findMinimum(node.right)
             let successor = self[successorIndex]
@@ -326,7 +328,7 @@ public struct RBTree<T: Comparable> {
         
         fixRedBlackPropertiesAfterDelete(movedUpNode)
 
-        if movedUpNode == self.emptyIndex {
+        if movedUpNode == self.nilIndex {
             let pIndex = self[movedUpNode].parent
             
             if pIndex != .empty {
@@ -362,9 +364,9 @@ public struct RBTree<T: Comparable> {
 
             if node.parent != .empty {
                 if node.color == .black {
-                    let newChild = self.createNilNode(parent: node.parent)
-                    replaceParentsChild(node.parent, oldChild: nIndex, newChild: newChild)
-                    return newChild
+                    self.createNilNode(parent: node.parent)
+                    replaceParentsChild(node.parent, oldChild: nIndex, newChild: self.nilIndex)
+                    return self.nilIndex
                 } else {
                     replaceParentsChild(node.parent, oldChild: nIndex)
                     return .empty

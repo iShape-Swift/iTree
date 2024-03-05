@@ -39,23 +39,26 @@ struct TreeScan {
             }
         }
 
-        var newNode = tree.store.getFree(value: item)
-
+        let newIndex = tree.store.getFreeIndex()
+        var newNode = tree[newIndex]
+        newNode.left = .empty
+        newNode.right = .empty
+        newNode.color = .red
+        newNode.value = item
+        newNode.parent = pIndex
+        tree[newIndex] = newNode
+        
         if pIndex == .empty {
-            tree.root = newNode.index
-            tree.save(newNode)
+            tree.root = newIndex
         } else {
-            newNode.parent = pIndex
-            tree.save(newNode)
-            
             if isLeft {
-                tree[pIndex].left = newNode.index
+                tree[pIndex].left = newIndex
             } else {
-                tree[pIndex].right = newNode.index
+                tree[pIndex].right = newIndex
             }
             
             if tree[pIndex].color == .red {
-                tree.fixRedBlackPropertiesAfterInsert(nIndex: newNode.index, pIndex: pIndex)
+                tree.fixRedBlackPropertiesAfterInsert(nIndex: newIndex, pIndex: pIndex)
             }
         }
     }
