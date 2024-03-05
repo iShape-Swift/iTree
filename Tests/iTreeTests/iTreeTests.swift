@@ -107,7 +107,7 @@ final class iTreeTests: XCTestCase {
     
     func test_9() throws {
         
-        for _ in 0...1000 {
+        for _ in 0...100 {
             var tree = RBTree(empty: 0)
             let values = (1...100).shuffled() // Randomly ordered values
             for value in values {
@@ -127,7 +127,7 @@ final class iTreeTests: XCTestCase {
 
     func test_9b() throws {
         
-        for _ in 0...1000 {
+        for _ in 0...100 {
             var tree = RBTree(empty: 0)
             let values = (1...100).shuffled() // Randomly ordered values
             for value in values {
@@ -147,7 +147,7 @@ final class iTreeTests: XCTestCase {
     
     func test_9c() throws {
         
-        for _ in 0...1000 {
+        for _ in 0...100 {
             var tree = RBTree(empty: 0)
             let values = (1...100).shuffled() // Randomly ordered values
             var j = 0

@@ -7,8 +7,8 @@
 
 struct TimeValueGenerator {
     
-    static func randomTimeRanges(range: Range<Int>, time: Range<Int>, count: Int) -> [RangeTimeValue] {
-        var result = [RangeTimeValue]()
+    static func randomTimeRanges(range: Range<Int>, time: Range<Int>, count: Int) -> [TimeIntervalValue] {
+        var result = [TimeIntervalValue]()
         result.reserveCapacity(count)
         
         for _ in 0..<count {
@@ -29,7 +29,7 @@ struct TimeValueGenerator {
                 end = t0
             }
             
-            result.append(RangeTimeValue(value: value, start: start, end: end))
+            result.append(TimeIntervalValue(value: value, start: start, end: end))
         }
         
         return result

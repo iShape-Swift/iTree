@@ -21,7 +21,7 @@ struct TreeScan {
             let node = tree[index]
             pIndex = index
             if node.value.segment.b.x <= stop {
-                tree.delete(index: index)
+                _ = tree.delete(index: index)
                 if node.parent != .empty {
                     index = node.parent
                 } else {
@@ -66,7 +66,7 @@ struct TreeScan {
         while index != .empty {
             let node = tree[index]
             if node.value.segment.b.x <= stop {
-                tree.delete(index: index)
+                _ = tree.delete(index: index)
                 if node.parent != .empty {
                     index = node.parent
                 } else {

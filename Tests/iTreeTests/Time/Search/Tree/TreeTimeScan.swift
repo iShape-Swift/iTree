@@ -10,9 +10,9 @@ import iTree
 
 struct TreeTimeScan {
     
-    private var tree = RBTree(empty: RangeTimeValue(value: 0, start: 0, end: 0))
+    private var tree = RBTree(empty: TimeIntervalValue(value: 0, start: 0, end: 0))
     
-    mutating func insert(item: RangeTimeValue, stop: Int) {
+    mutating func insert(item: TimeIntervalValue, stop: Int) {
         var index = tree.root
         var pIndex = UInt32.empty
         var isLeft = false
@@ -21,13 +21,8 @@ struct TreeTimeScan {
             let node = tree[index]
             pIndex = index
             if node.value.end <= stop {
-                tree.delete(index: index)
-                if node.parent != .empty {
-                    index = node.parent
-                } else {
-                    index = tree.root
-                    pIndex = .empty
-                }
+                index = tree.delete(index: index)
+                pIndex = .empty
             } else {
                 isLeft = item < node.value
                 if isLeft {
@@ -61,21 +56,45 @@ struct TreeTimeScan {
     }
     
     mutating func findEqualOrLower(time t: TimeValue) -> Int {
+        let index = self.findEqualOrLowerIndex(time: t)
+        if index != .empty {
+            return tree[index].value.value
+        } else {
+            return .min
+        }
+    }
+
+    private mutating func findEqualOrLowerIndex(time t: TimeValue) -> UInt32 {
         var index = tree.root
         var result: UInt32 = .empty
         while index != .empty {
             let node = tree[index]
             if node.value.end <= t.time {
-                tree.delete(index: index)
-                if node.parent != .empty {
-                    index = node.parent
-                } else {
-                    index = tree.root
-                }
+                index = tree.delete(index: index)
             } else {
                 if node.value.value == t.value {
-                    return node.value.value
+                    return index
                 } else if node.value.value < t.value {
+                    result = index
+                    index = node.right
+                } else {
+                    index = node.left
+                }
+            }
+        }
+        
+        return result
+    }
+    
+    private mutating func findLowerIndex(time t: TimeValue) -> UInt32 {
+        var index = tree.root
+        var result: UInt32 = .empty
+        while index != .empty {
+            let node = tree[index]
+            if node.value.end <= t.time {
+                index = tree.delete(index: index)
+            } else {
+                if node.value.value < t.value {
                     result = index
                     index = node.right
                 } else {
@@ -87,7 +106,8 @@ struct TreeTimeScan {
         if result == .empty {
             return .min
         } else {
-            return tree[result].value.value
+            return result
         }
     }
+    
 }

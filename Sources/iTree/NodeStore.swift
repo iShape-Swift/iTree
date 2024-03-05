@@ -23,7 +23,7 @@ public struct NodeStore<T> {
     }
 
     @inlinable
-    mutating func getFreeIndex() -> UInt32 {
+    public mutating func getFreeIndex() -> UInt32 {
         if unused.isEmpty {
             self.reserve(length: 16)
         }
@@ -32,9 +32,6 @@ public struct NodeStore<T> {
     
     @inlinable
     public mutating func getFree(value: T) -> TreeNode<T> {
-        if unused.isEmpty {
-            self.reserve(length: 16)
-        }
         let index = Int(self.getFreeIndex())
         
         var node = buffer[index]

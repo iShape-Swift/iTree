@@ -7,7 +7,7 @@
 
 struct DirectTimeSolver {
     
-    func run(items: [RangeTimeValue], times: [TimeValue]) -> [Int] {
+    func run(items: [TimeIntervalValue], times: [TimeValue]) -> [Int] {
 
         var scanList = DirectTimeScan()
         
