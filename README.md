@@ -1,2 +1,2 @@
 # iTree
-Binary tree implementation for swift
+Red-black tree implementation for swift
