@@ -45,4 +45,14 @@ public struct NodeStore<T> {
             unused.append(n + l - i - 1)
         }
     }
+    
+    @inlinable
+    mutating func clearAll() {
+        let n = buffer.count
+        var i: Int = 1
+        while i < n {
+            unused[i] = UInt32(n - i)
+            i += 1
+        }
+    }
 }

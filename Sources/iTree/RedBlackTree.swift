@@ -25,6 +25,33 @@ public struct RBTree<T: Comparable> {
     }
     
     @inlinable
+    public mutating func clearAll() {
+        guard root != .empty else {
+            return
+        }
+        store.putBack(index: root)
+        root = .empty
+
+        var n = 1
+        repeat {
+            let i0 = store.unused.count - n
+            n = 0
+            for i in i0..<store.unused.count {
+                let index = store.unused[i]
+                let node = self[index]
+                if node.left != .empty {
+                    store.putBack(index: node.left)
+                    n += 1
+                }
+                if node.right != .empty {
+                    store.putBack(index: node.right)
+                    n += 1
+                }
+            }
+        } while n > 0
+    }
+    
+    @inlinable
     func isBlack(_ index: UInt32) -> Bool {
         index == .empty || index != .empty && store.buffer[Int(index)].color == .black
     }
