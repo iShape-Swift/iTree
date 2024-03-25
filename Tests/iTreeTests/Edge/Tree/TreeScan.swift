@@ -10,7 +10,7 @@ import iTree
 
 struct TreeScan {
     
-    private var tree = RBTree(empty: IdSegment(index: .max, segment: .init(a: .zero, b: .zero)))
+    private var tree = RBTree(empty: IdSegment(index: .max, segment: .init(a: .zero, b: .zero)), capacity: 16)
     
     mutating func insert(item: IdSegment, stop: Int32) {
         var index = tree.root
@@ -31,7 +31,6 @@ struct TreeScan {
             } else {
                 isLeft = item < node.value
                 if isLeft {
-                    isLeft = true
                     index = node.left
                 } else {
                     index = node.right

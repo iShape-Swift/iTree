@@ -67,7 +67,7 @@ public struct RBTree<T: Comparable> {
 
 #if DEBUG
     @inlinable
-    public init(empty: T, capacity: Int = 8) {
+    public init(empty: T, capacity: Int) {
         self.store = NodeStore(empty: empty, capacity: capacity)
         self.nilIndex = store.getFreeIndex()
         assert(nilIndex == 0)
@@ -75,7 +75,7 @@ public struct RBTree<T: Comparable> {
     }
 #else
     @inlinable
-    public init(empty: T, capacity: Int = 32) {
+    public init(empty: T, capacity: Int) {
         self.store = NodeStore(empty: empty, capacity: capacity)
         self.nilIndex = store.getFreeIndex()
         self.root = .empty
@@ -88,11 +88,11 @@ public struct RBTree<T: Comparable> {
         let p = n.parent
         
         let ltIndex = n.left
-        let l = self[ltIndex]
+        let ltRight = self[ltIndex].right
         
-        if l.right != .empty {
-            n.left = l.right
-            self[l.right].parent = index
+        if ltRight != .empty {
+            n.left = ltRight
+            self[ltRight].parent = index
         } else {
             n.left = .empty
         }
@@ -130,9 +130,9 @@ public struct RBTree<T: Comparable> {
     
     @inlinable
     mutating func replaceParentsChild(_ parent: UInt32, oldChild: UInt32, newChild: UInt32) {
+        self[newChild].parent = parent
         guard parent != .empty else {
             root = newChild
-            self[newChild].parent = .empty
             return
         }
         
@@ -146,7 +146,6 @@ public struct RBTree<T: Comparable> {
         }
         
         self[parent] = p
-        self[newChild].parent = parent
     }
     
     @inlinable

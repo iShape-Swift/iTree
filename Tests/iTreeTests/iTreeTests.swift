@@ -4,14 +4,14 @@ import XCTest
 final class iTreeTests: XCTestCase {
     
     func test_0() throws {
-        let tree = RBTree(empty: 0)
+        let tree = RBTree(empty: 0, capacity: 16)
         let a = tree.find(value: 1) ?? .max
         
         XCTAssertEqual(a, .max)
     }
 
     func test_1() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
         tree.insert(value: 5)
         let a0 = tree.find(value: 1) ?? .max
         let a1 = tree.find(value: 5) ?? .max
@@ -23,7 +23,7 @@ final class iTreeTests: XCTestCase {
     }
 
     func test_2() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
         tree.insert(value: 5)
         tree.insert(value: 3)
         tree.insert(value: 1)
@@ -37,7 +37,7 @@ final class iTreeTests: XCTestCase {
     }
     
     func test_3() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
 
         tree.insert(value: 10)
         tree.insert(value: 15)
@@ -48,7 +48,7 @@ final class iTreeTests: XCTestCase {
     }
     
     func test_4() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
         
         tree.insert(value: 10)
         tree.insert(value: 15)
@@ -60,7 +60,7 @@ final class iTreeTests: XCTestCase {
     }
     
     func test_5() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
 
         tree.insert(value: 10)
         tree.insert(value: 20)
@@ -73,7 +73,7 @@ final class iTreeTests: XCTestCase {
     }
     
     func test_6() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
 
         tree.insert(value: 10)
         tree.insert(value: 15)
@@ -82,13 +82,13 @@ final class iTreeTests: XCTestCase {
         tree.insert(value: 6)
         tree.insert(value: 20)
         
-        tree.delete(value: 15) // Remove a node with children
+        tree.delete(value: 15);
         XCTAssertTrue(tree.verifyRedProperty(tree.root), "Red node property violated after rotations.")
         XCTAssertTrue(tree.verifyBlackHeightConsistency(tree.root), "Black height inconsistent after deletion.")
     }
     
-    func test_8() throws {
-        var tree = RBTree(empty: 0)
+    func test_7() throws {
+        var tree = RBTree(empty: 0, capacity: 16)
         // Insert values in a specific order that requires rotations to maintain red-black properties
         tree.insert(value: 40)
         tree.insert(value: 20)
@@ -105,18 +105,35 @@ final class iTreeTests: XCTestCase {
         XCTAssertEqual(tree.rightValue(tree.root), 60, "Right child of root is incorrect.")
     }
     
-    func test_9() throws {
+    func test_8() throws {
+        var tree = RBTree(empty: 0, capacity: 16)
+        // Insert values in a specific order that requires rotations to maintain red-black properties
+        tree.insert(value: 2)
+        tree.insert(value: 1)
+        tree.insert(value: 6)
+        tree.insert(value: 4)
+        tree.insert(value: 3)
+        tree.insert(value: 5)
+
+        tree.delete(value: 2)
+        tree.delete(value: 1)
+
+        XCTAssertTrue(tree.verifyRedProperty(tree.root), "Red node property violated after rotations.")
+        XCTAssertTrue(tree.verifyBlackHeightConsistency(tree.root), "Black height inconsistent after deletion.")
+    }
+    
+    func test_9a() throws {
         
         for _ in 0...100 {
-            var tree = RBTree(empty: 0)
-            let values = (1...100).shuffled() // Randomly ordered values
+            var tree = RBTree(empty: 0, capacity: 16)
+            let values = (1...100).shuffled()
             for value in values {
                 tree.insert(value: value)
             }
             
             // Delete a subset of values randomly
-            for value in values.prefix(20).shuffled() {
-                tree.delete(value: value)
+            for i in 0..<20 {
+                tree.delete(value: values[i])
             }
             
             // Verify the red-black properties
@@ -128,18 +145,16 @@ final class iTreeTests: XCTestCase {
     func test_9b() throws {
         
         for _ in 0...100 {
-            var tree = RBTree(empty: 0)
+            var tree = RBTree(empty: 0, capacity: 16)
             let values = (1...100).shuffled() // Randomly ordered values
             for value in values {
                 tree.insert(value: value)
             }
             
-            // Delete a subset of values randomly
             for value in values {
                 tree.delete(value: value)
             }
-            
-            // Verify the red-black properties
+
             XCTAssertTrue(tree.verifyRedProperty(tree.root), "Red node property violated after rotations.")
             XCTAssertTrue(tree.verifyBlackHeightConsistency(tree.root), "Black height inconsistent after deletion.")
         }
@@ -148,7 +163,7 @@ final class iTreeTests: XCTestCase {
     func test_9c() throws {
         
         for _ in 0...100 {
-            var tree = RBTree(empty: 0)
+            var tree = RBTree(empty: 0, capacity: 16)
             let values = (1...100).shuffled() // Randomly ordered values
             var j = 0
             while j < values.count - 2 {
@@ -167,7 +182,7 @@ final class iTreeTests: XCTestCase {
     }
     
     func test_10() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
         let values = (1...100).shuffled() // Randomly ordered values
         for value in values {
             tree.insert(value: value)
@@ -180,7 +195,7 @@ final class iTreeTests: XCTestCase {
     }
     
     func test_11() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
         // Insert a sequence of values
         (1...100).forEach { tree.insert(value: $0) }
         
@@ -191,7 +206,7 @@ final class iTreeTests: XCTestCase {
     }
 
     func test_12() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
         let values = (1...6).shuffled()
         print(values)
         for value in values {
@@ -208,8 +223,8 @@ final class iTreeTests: XCTestCase {
         XCTAssertTrue(tree.verifyBlackHeightConsistency(tree.root), "Black height inconsistent after deletion.")
     }
     
-    func test_12b() throws {
-        var tree = RBTree(empty: 0)
+    func test_13() throws {
+        var tree = RBTree(empty: 0, capacity: 16)
         let values = (1...7).shuffled()
         print(values)
         var j = 0
@@ -227,7 +242,7 @@ final class iTreeTests: XCTestCase {
     }
     
     func test_14() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
         let values = [1, 6, 2, 5, 4]
         for value in values {
             tree.insert(value: value)
@@ -242,7 +257,7 @@ final class iTreeTests: XCTestCase {
     }
     
     func test_15() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
         let values = [5, 6, 1, 3, 4, 2]
         for value in values {
             tree.insert(value: value)
@@ -257,7 +272,7 @@ final class iTreeTests: XCTestCase {
     }
     
     func test_16() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
         let values = [4, 1, 6, 3, 2, 5]
         for value in values {
             tree.insert(value: value)
@@ -272,7 +287,7 @@ final class iTreeTests: XCTestCase {
     }
     
     func test_17() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
         // [6, 7, 2, 1, 4, 3, 5]
         tree.insert(value: 6)
         tree.insert(value: 7)
@@ -291,7 +306,7 @@ final class iTreeTests: XCTestCase {
     }
     
     func test_18() throws {
-        var tree = RBTree(empty: 0)
+        var tree = RBTree(empty: 0, capacity: 16)
         
         tree.insert(value: 10)
         tree.insert(value: 20)

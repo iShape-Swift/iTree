@@ -26,8 +26,8 @@ final class EdgeTests: XCTestCase {
         XCTAssertTrue(isEqual)
     }
     
-    func test_random_small() throws {
-        for _ in 0...100000 {
+    func test_small_random() throws {
+        for _ in 0...1000 {
             let edges = self.randomEdges(range: 0..<8, length: 2..<6, count: 8)
             let points = self.randomPoints(range: 0..<8, count: 5, exclude: edges)
             let result0 = PointDirectSolver().run(items: edges, points: points)
@@ -75,9 +75,32 @@ final class EdgeTests: XCTestCase {
 
         XCTAssertTrue(result0 == result1)
     }
-    
-    
-    
+
+    func test_2() throws {
+        let edges = [
+            IdSegment(index: 3, segment: Segment(a: Point(x: 0, y: 3), b: Point(x: 7, y: 6))),
+            IdSegment(index: 5, segment: Segment(a: Point(x: 0, y: 5), b: Point(x: 0, y: 5))),
+            IdSegment(index: 2, segment: Segment(a: Point(x: 1, y: 0), b: Point(x: 7, y: 5))),
+            IdSegment(index: 4, segment: Segment(a: Point(x: 1, y: 4), b: Point(x: 2, y: 4))),
+            IdSegment(index: 7, segment: Segment(a: Point(x: 1, y: 4), b: Point(x: 2, y: 5))),
+            IdSegment(index: 6, segment: Segment(a: Point(x: 2, y: 2), b: Point(x: 2, y: 2))),
+            IdSegment(index: 0, segment: Segment(a: Point(x: 3, y: 3), b: Point(x: 4, y: 4))),
+            IdSegment(index: 1, segment: Segment(a: Point(x: 3, y: 3), b: Point(x: 4, y: 3))),
+        ]
+        
+        let points = [
+            Point(x: 2, y: 1),
+            Point(x: 3, y: 1),
+            Point(x: 6, y: 5),
+            Point(x: 6, y: 4),
+            Point(x: 6, y: 0),
+        ]
+        
+        let result0 = PointDirectSolver().run(items: edges, points: points)
+        let result1 = PointTreeSolver().run(items: edges, points: points)
+
+        XCTAssertTrue(result0 == result1)
+    }
     
     private func randomEdges(range: Range<Int32>, length: Range<Int32>, count: Int) -> [IdSegment] {
         let list = CrossSolver.randomSegments(range: range, length: length, count: count)

@@ -10,7 +10,7 @@ import iTree
 
 struct TreeTimeScan {
     
-    private var tree = RBTree(empty: TimeIntervalValue(value: 0, start: 0, end: 0))
+    private var tree = RBTree(empty: TimeIntervalValue(value: 0, start: 0, end: 0), capacity: 16)
     
     mutating func insert(item: TimeIntervalValue, stop: Int) {
         var index = tree.root

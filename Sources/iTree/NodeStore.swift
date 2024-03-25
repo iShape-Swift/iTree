@@ -18,7 +18,9 @@ public struct NodeStore<T> {
     init(empty: T, capacity: Int) {
         self.empty = empty
         self.buffer = [TreeNode]()
+        self.buffer.reserveCapacity(capacity)
         self.unused = [UInt32]()
+        self.unused.reserveCapacity(capacity)
         self.reserve(length: capacity)
     }
 
