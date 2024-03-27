@@ -12,8 +12,8 @@ let package = Package(
             targets: ["iTree"]),
     ],
     dependencies: [
-//        .package(url: "https://github.com/iShape-Swift/iFixFloat", .upToNextMajor(from: "1.5.0")),
-        .package(path: "../iFixFloat"),
+        .package(url: "https://github.com/iShape-Swift/iFixFloat", .upToNextMajor(from: "1.6.0")),
+//        .package(path: "../iFixFloat"),
         
     ],
     targets: [
