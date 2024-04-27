@@ -28,69 +28,73 @@ public extension RBTree {
     
     @inlinable
     init(empty: T, array: [T], extraCapacity: Int = 4) {
-        self.store = NodeStore(empty: empty, capacity: array.count + extraCapacity)
+        let n = array.count
+        
+        self.store = NodeStore(empty: empty, capacity: n + extraCapacity)
         self.nilIndex = store.getFreeIndex()
         assert(nilIndex == 0)
         
-        guard !array.isEmpty else {
+        guard n != 0 else {
             self.root = .empty
             return
         }
-        
+
         self.root = self.store.getFreeIndex()
         var rootNode = self.store.buffer[Int(self.root)]
         rootNode.color = .black
-        rootNode.value = array[0]
+        let middle = n >> 1
+        rootNode.value = array[middle]
         self.store.buffer[Int(self.root)] = rootNode
+        var visited = [Bool](repeating: false, count: n)
+        visited[middle] = true
         
-        var n = array.count
-        let log = n.logTwo
+        let log = (n + 1).logTwo - 1
+        let s0 = n >> 1
         
         var j = 1
         for i in 1..<log {
             let color: NodeColor = i & 1 == 0 ? .black : .red
-            let st = n >> i
-            var s = st >> 1
+            var s = s0
             
-            while s < n {
-                let pi = (j - 1) >> 1
-                if j + 1 < n {
-                    var parent = self.store.buffer[pi]
-                    parent.left = UInt32(j)
-                    parent.right = UInt32(j + 1)
-                    self.store.buffer[pi] = parent
-                    
-                    let left = self.store.getFreeIndex()
-                    var leftNode = self.store.buffer[Int(left)]
-                    leftNode.color = color
-                    leftNode.value = array[s]
-                    self.store.buffer[Int(left)] = leftNode
-                    
-                    s += st
-                    
-                    let right = self.store.getFreeIndex()
-                    var rightNode = self.store.buffer[Int(right)]
-                    rightNode.color = color
-                    rightNode.value = array[s]
-                    self.store.buffer[Int(right)] = rightNode
-                    
-                    s += st
-                    
-                    j += 2
-                } else {
-                    if j < n {
-                        var parent = self.store.buffer[pi]
-                        parent.left = UInt32(j)
-                        self.store.buffer[pi] = parent
-                        
-                        let left = self.store.getFreeIndex()
-                        var leftNode = self.store.buffer[Int(left)]
-                        leftNode.color = color
-                        leftNode.value = array[s]
-                        self.store.buffer[Int(left)] = leftNode
-                    }
-                    break
-                }
+            let ni = (1 << (i - 1))
+            for _ in 0..<ni {
+                let p = ((j - 1) >> 1) + 1
+                
+                var parent = self.store.buffer[p]
+                parent.left = UInt32(j + 1)
+                parent.right = UInt32(j + 2)
+                self.store.buffer[p] = parent
+
+                let lt = s >> i
+                let left = self.store.getFreeIndex()
+                var leftNode = self.store.buffer[Int(left)]
+                leftNode.parent = UInt32(p)
+                leftNode.color = color
+                leftNode.value = array[lt]
+                self.store.buffer[Int(left)] = leftNode
+                
+                s += n
+                
+                let rt = s >> i
+                let right = self.store.getFreeIndex()
+                var rightNode = self.store.buffer[Int(right)]
+                rightNode.parent = UInt32(p)
+                rightNode.color = color
+                rightNode.value = array[rt]
+                self.store.buffer[Int(right)] = rightNode
+                
+                visited[lt] = true
+                visited[rt] = true
+                
+                s += n
+                
+                j += 2
+            }
+        }
+        
+        for i in 0..<visited.count {
+            if !visited[i] {
+                self.insert(value: array[i])
             }
         }
     }
@@ -128,12 +132,12 @@ public extension RBTree {
         stack.append(StackNode(index: self.root, left: rootNode.left, right: rootNode.right))
         
         while !stack.isEmpty {
-            let last_stack_index = stack.count - 1
-            var s = stack[last_stack_index]
+            let lastStackIndex = stack.count - 1
+            let s = stack[lastStackIndex]
             
             if s.left != .empty {
                 let index = s.left
-                s.left = .empty // to skip next time
+                stack[lastStackIndex].left = .empty // to skip next time
                 
                 // go down left
                 let node = self[index]
@@ -143,7 +147,7 @@ public extension RBTree {
             } else {
                 if s.index != .empty {
                     let index = s.index
-                    s.index = .empty // to skip next time
+                    stack[lastStackIndex].index = .empty // to skip next time
                     
                     // add value
                     list.append(self[index].value)
@@ -151,7 +155,7 @@ public extension RBTree {
                 
                 if s.right != .empty {
                     let index = s.right
-                    s.right = .empty // to skip next time
+                    stack[lastStackIndex].right = .empty // to skip next time
                     
                     // go down right
                     let node = self[index]
