@@ -42,12 +42,9 @@ public extension RBTree {
         self.root = self.store.getFreeIndex()
         var rootNode = self.store.buffer[Int(self.root)]
         rootNode.color = .black
-        let middle = n >> 1
-        rootNode.value = array[middle]
+        rootNode.value = array[n >> 1]
         self.store.buffer[Int(self.root)] = rootNode
-        var visited = [Bool](repeating: false, count: n)
-        visited[middle] = true
-        
+
         let log = (n + 1).logTwo - 1
         let s0 = n >> 1
         
@@ -59,7 +56,7 @@ public extension RBTree {
             let ni = (1 << (i - 1))
             for _ in 0..<ni {
                 let p = ((j - 1) >> 1) + 1
-                
+
                 var parent = self.store.buffer[p]
                 parent.left = UInt32(j + 1)
                 parent.right = UInt32(j + 2)
@@ -82,21 +79,24 @@ public extension RBTree {
                 rightNode.color = color
                 rightNode.value = array[rt]
                 self.store.buffer[Int(right)] = rightNode
-                
-                visited[lt] = true
-                visited[rt] = true
-                
+
                 s += n
                 
                 j += 2
             }
         }
-        
-        for i in 0..<visited.count {
-            if !visited[i] {
-                self.insert(value: array[i])
+
+        var s = s0
+        while j < n {
+            let index = s >> log
+            let a = array[index]
+            s += n
+                  
+            if self.insertIfNotExist(value: a) {
+                j += 1
             }
         }
+        
     }
     
     
