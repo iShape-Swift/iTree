@@ -31,7 +31,7 @@ public struct RBTree<T: Comparable> {
         }
         store.putBack(index: root)
         root = .empty
-
+        
         var n = 1
         repeat {
             let i0 = store.unused.count - n
@@ -64,7 +64,7 @@ public struct RBTree<T: Comparable> {
         node.right = .empty
         node.color = .red
     }
-
+    
 #if DEBUG
     @inlinable
     public init(empty: T, capacity: Int) {
@@ -81,7 +81,7 @@ public struct RBTree<T: Comparable> {
         self.root = .empty
     }
 #endif
-
+    
     @inlinable
     mutating func rotateRight(_ index: UInt32) {
         var n = self[index]
@@ -194,7 +194,7 @@ public struct RBTree<T: Comparable> {
                 index = node.right
             }
         } while index != .empty
-
+        
         let newIndex = self.store.getFreeIndex()
         var newNode = self[newIndex]
         newNode.parent = pIndex
@@ -203,7 +203,7 @@ public struct RBTree<T: Comparable> {
         newNode.color = .red
         newNode.value = value
         self[newIndex] = newNode
-
+        
         if isLeft {
             self[pIndex].left = newIndex
         } else {
@@ -231,7 +231,7 @@ public struct RBTree<T: Comparable> {
             self[pIndex].color = .black
             return
         }
-
+        
         // Case 3: Uncle is red -> recolor parent, grandparent and uncle
         let uIndex = self.getUncle(pIndex: pIndex)
         let grandparent = self[gIndex]
@@ -239,7 +239,7 @@ public struct RBTree<T: Comparable> {
             self[pIndex].color = .black
             self[gIndex].color = .red
             self[uIndex].color = .black
-
+            
             // Call recursively for grandparent, which is now red.
             // It might be root or have a red parent, in which case we need to fix more...
             let ggIndex = grandparent.parent
@@ -251,15 +251,15 @@ public struct RBTree<T: Comparable> {
             // Case 4a: Uncle is black and node is left->right "inner child" of its grandparent
             if nIndex == parent.right {
                 rotateLeft(pIndex)
-
+                
                 // Let "parent" point to the new root node of the rotated sub-tree.
                 // It will be recolored in the next step, which we're going to fall-through to.
                 pIndex = nIndex
             }
-
+            
             // Case 5a: Uncle is black and node is left->left "outer child" of its grandparent
             rotateRight(gIndex)
-
+            
             // Recolor original parent and grandparent
             self[pIndex].color = .black
             self[gIndex].color = .red
@@ -268,15 +268,15 @@ public struct RBTree<T: Comparable> {
             // Case 4b: Uncle is black and node is right->left "inner child" of its grandparent
             if nIndex == parent.left {
                 rotateRight(pIndex)
-
+                
                 // Let "parent" point to the new root node of the rotated sub-tree.
                 // It will be recolored in the next step, which we're going to fall-through to.
                 pIndex = nIndex
             }
-
+            
             // Case 5b: Uncle is black and node is right->right "outer child" of its grandparent
             rotateLeft(gIndex)
-
+            
             // Recolor original parent and grandparent
             self[pIndex].color = .black
             self[gIndex].color = .red
@@ -320,7 +320,7 @@ public struct RBTree<T: Comparable> {
             assertionFailure("value is not found")
             return
         }
-
+        
         _ = self.delete(index: index)
     }
     
@@ -328,7 +328,7 @@ public struct RBTree<T: Comparable> {
     public mutating func delete(index: UInt32) -> UInt32 {
         let movedUpNode: UInt32
         let deletedNodeColor: NodeColor
-
+        
         let node = self[index]
         
         let isRoot = index == root
@@ -342,18 +342,18 @@ public struct RBTree<T: Comparable> {
             let successorIndex = findMinimum(node.right)
             let successor = self[successorIndex]
             deletedNodeColor = successor.color
-
+            
             self[index].value = successor.value
             
             movedUpNode = deleteNodeWithZeroOrOneChild(successorIndex)
         }
-
+        
         guard movedUpNode != .empty, deletedNodeColor == .black else {
             return isSingle ? self.parent(index: index) : (isRoot ? root : index)
         }
         
         fixRedBlackPropertiesAfterDelete(movedUpNode)
-
+        
         if movedUpNode == self.nilIndex {
             let pIndex = self[movedUpNode].parent
             
@@ -387,7 +387,7 @@ public struct RBTree<T: Comparable> {
             // Node has no children -->
             // * node is red --> just remove it
             // * node is black --> replace it by a temporary NIL node (needed to fix the R-B rules)
-
+            
             if node.parent != .empty {
                 if node.color == .black {
                     self.createNilNode(parent: node.parent)
@@ -411,15 +411,15 @@ public struct RBTree<T: Comparable> {
             // do not color root to black
             return
         }
-
+        
         var sIndex = getSibling(nIndex)
-
+        
         // Case 2: Red sibling
         if self[sIndex].color == .red {
             handleRedSibling(nIndex, sIndex)
             sIndex = getSibling(nIndex) // Get new sibling for fall-through to cases 3-6
         }
-
+        
         let sibling = self[sIndex]
         
         // Cases 3+4: Black sibling with two black children
@@ -446,7 +446,7 @@ public struct RBTree<T: Comparable> {
         let pIndex = self[nIndex].parent
         var sibling = self[sIndex]
         let nodeIsLeftChild = nIndex == self[pIndex].left
-
+        
         // Case 5: Black sibling with at least one red child + "outer nephew" is black
         // --> Recolor sibling and its child, and rotate around sibling
         if nodeIsLeftChild && isBlack(sibling.right) {
@@ -466,9 +466,9 @@ public struct RBTree<T: Comparable> {
             sIndex = self[pIndex].left
             sibling = self[sIndex]
         }
-
+        
         // Fall-through to case 6...
-
+        
         // Case 6: Black sibling with at least one red child + "outer nephew" is red
         // --> Recolor sibling + parent + sibling's child, and rotate around parent
         self[sIndex].color = self[pIndex].color
@@ -494,7 +494,7 @@ public struct RBTree<T: Comparable> {
         let pIndex = self[nIndex].parent
         
         self[pIndex].color = .red
-
+        
         // ... and rotate
         if nIndex == self[pIndex].left {
             rotateLeft(pIndex)
@@ -528,7 +528,7 @@ public struct RBTree<T: Comparable> {
     @inlinable
     public func find(value: T) -> T? {
         var index = root
-
+        
         while index != .empty {
             let node = self[index]
             if node.value == value {
@@ -541,5 +541,20 @@ public struct RBTree<T: Comparable> {
         }
         
         return nil
+    }
+    
+    @inlinable
+    public func height() -> Int {
+        guard self.root != .empty else { return 0 }
+        var node = self[self.root]
+        var height = 1
+        while node.left != .empty {
+            node = self[node.left]
+            if node.color == .black {
+                height += 1
+            }
+        }
+        
+        return height << 1
     }
 }
