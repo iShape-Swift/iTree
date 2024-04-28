@@ -27,7 +27,7 @@ public struct StackNode {
 public extension RBTree {
     
     @inlinable
-    init(empty: T, array: [T], extraCapacity: Int = 4) {
+    init(empty: T, array: ArraySlice<T>, extraCapacity: Int = 4) {
         let n = array.count
         
         self.store = NodeStore(empty: empty, capacity: n + extraCapacity)
@@ -38,13 +38,13 @@ public extension RBTree {
             self.root = .empty
             return
         }
-
+        
         self.root = self.store.getFreeIndex()
         var rootNode = self.store.buffer[Int(self.root)]
         rootNode.color = .black
         rootNode.value = array[n >> 1]
         self.store.buffer[Int(self.root)] = rootNode
-
+        
         let log = (n + 1).logTwo - 1
         let s0 = n >> 1
         
@@ -56,12 +56,12 @@ public extension RBTree {
             let ni = (1 << (i - 1))
             for _ in 0..<ni {
                 let p = ((j - 1) >> 1) + 1
-
+                
                 var parent = self.store.buffer[p]
                 parent.left = UInt32(j + 1)
                 parent.right = UInt32(j + 2)
                 self.store.buffer[p] = parent
-
+                
                 let lt = s >> i
                 let left = self.store.getFreeIndex()
                 var leftNode = self.store.buffer[Int(left)]
@@ -79,27 +79,26 @@ public extension RBTree {
                 rightNode.color = color
                 rightNode.value = array[rt]
                 self.store.buffer[Int(right)] = rightNode
-
+                
                 s += n
                 
                 j += 2
             }
         }
-
+        
         var s = s0
         while j < n {
             let index = s >> log
             let a = array[index]
             s += n
-                  
+            
             if self.insertIfNotExist(value: a) {
                 j += 1
             }
         }
-        
     }
     
-    
+    @inlinable
     func orderedList() -> [T] {
         if self.root == .empty {
             return []
@@ -167,6 +166,32 @@ public extension RBTree {
                     _ = stack.removeLast()
                 }
             }
+        }
+    }
+    
+    @inlinable
+    func firstByOrder() -> UInt32 {
+        self.findLeftMinimum(self.root)
+    }
+    
+    @inlinable
+    func nextByOrder(index: UInt32) -> UInt32 {
+        let this = self[index]
+        if this.right != .empty {
+            return self.findLeftMinimum(this.right)
+        } else {
+            // first perent bigger
+            var i = this.parent
+            while i != .empty {
+                if self[i].value > this.value {
+                    return i
+                } else {
+                    i = self[i].parent
+                }
+            }
+            
+            // last element
+            return .empty
         }
     }
 }

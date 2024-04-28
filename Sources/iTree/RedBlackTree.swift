@@ -161,7 +161,7 @@ public struct RBTree<T: Comparable> {
         
         self[parent] = p
     }
-
+    
     @inlinable
     public mutating func insertIfNotExist(value: T) -> Bool {
         guard self.root != .empty else {
@@ -197,24 +197,7 @@ public struct RBTree<T: Comparable> {
             }
         } while index != .empty
         
-        let newIndex = self.store.getFreeIndex()
-        var newNode = self[newIndex]
-        newNode.parent = pIndex
-        newNode.left = .empty
-        newNode.right = .empty
-        newNode.color = .red
-        newNode.value = value
-        self[newIndex] = newNode
-        
-        if isLeft {
-            self[pIndex].left = newIndex
-        } else {
-            self[pIndex].right = newIndex
-        }
-        
-        if self[pIndex].color == .red {
-            fixRedBlackPropertiesAfterInsert(nIndex: newIndex, pIndex: pIndex)
-        }
+        _ = self.insert(value: value, pIndex: pIndex, isLeft: isLeft)
         
         return true
     }
@@ -252,6 +235,11 @@ public struct RBTree<T: Comparable> {
             }
         } while index != .empty
         
+        _ = self.insert(value: value, pIndex: pIndex, isLeft: isLeft)
+    }
+    
+    @inlinable
+    public mutating func insert(value: T, pIndex: UInt32, isLeft: Bool) -> UInt32 {
         let newIndex = self.store.getFreeIndex()
         var newNode = self[newIndex]
         newNode.parent = pIndex
@@ -270,7 +258,10 @@ public struct RBTree<T: Comparable> {
         if self[pIndex].color == .red {
             fixRedBlackPropertiesAfterInsert(nIndex: newIndex, pIndex: pIndex)
         }
+        
+        return newIndex
     }
+    
     
     @inlinable
     public mutating func fixRedBlackPropertiesAfterInsert(nIndex: UInt32, pIndex: UInt32) {
@@ -396,7 +387,7 @@ public struct RBTree<T: Comparable> {
             deletedNodeColor = node.color
             movedUpNode = deleteNodeWithZeroOrOneChild(index)
         } else {
-            let successorIndex = findMinimum(node.right)
+            let successorIndex = findLeftMinimum(node.right)
             let successor = self[successorIndex]
             deletedNodeColor = successor.color
             
@@ -573,7 +564,7 @@ public struct RBTree<T: Comparable> {
     }
     
     @inlinable
-    func findMinimum(_ nIndex: UInt32) -> UInt32 {
+    func findLeftMinimum(_ nIndex: UInt32) -> UInt32 {
         var i = nIndex
         while self[i].left != .empty {
             i = self[i].left
@@ -598,6 +589,24 @@ public struct RBTree<T: Comparable> {
         }
         
         return nil
+    }
+    
+    @inlinable
+    public func findIndex(value: T) -> UInt32 {
+        var index = root
+        
+        while index != .empty {
+            let node = self[index]
+            if node.value == value {
+                return index
+            } else if value < node.value {
+                index = node.left
+            } else {
+                index = node.right
+            }
+        }
+        
+        return .empty
     }
     
     @inlinable

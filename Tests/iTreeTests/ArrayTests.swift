@@ -16,7 +16,7 @@ final class ArrayTests: XCTestCase {
         for a in list {
             tree.insert(value: a)
         }
-
+        
         let ordered = tree.orderedList()
         list.sort()
         
@@ -33,21 +33,21 @@ final class ArrayTests: XCTestCase {
             for a in list {
                 tree.insert(value: a)
             }
-
+            
             let ordered = tree.orderedList()
             list.sort()
             
             XCTAssertEqual(ordered, list)
         }
     }
-
+    
     func test_init_0() throws {
         let list = [0]
         let tree = RBTree(empty: 0, array: list)
         let ordered = tree.orderedList()
         XCTAssertEqual(ordered, list)
     }
-
+    
     func test_init_1() throws {
         let list = [0, 1]
         let tree = RBTree(empty: 0, array: list)
@@ -75,7 +75,7 @@ final class ArrayTests: XCTestCase {
         let ordered = tree.orderedList()
         XCTAssertEqual(ordered, list)
     }
-
+    
     func test_init_5() throws {
         let list = Array(0...5)
         let tree = RBTree(empty: 0, array: list)
@@ -112,12 +112,51 @@ final class ArrayTests: XCTestCase {
     }
     
     func test_init_sequence() throws {
-        for i in 7...100 {
+        for i in 8...2050 {
             let list = Array(0..<i)
             let tree = RBTree(empty: 0, array: list)
             let ordered = tree.orderedList()
             XCTAssertEqual(ordered, list)
         }
+    }
+    
+    func test_next_by_order_0() throws {
+        self.test_next_by_order(list: [0])
+    }
+
+    func test_next_by_order_1() throws {
+        self.test_next_by_order(list: [0, 1])
+    }
+    
+    func test_next_by_order_2() throws {
+        self.test_next_by_order(list: Array(0...2))
+    }
+
+    func test_next_by_order_3() throws {
+        self.test_next_by_order(list: Array(0...3))
+    }
+    
+    func test_next_by_order_4() throws {
+        self.test_next_by_order(list: Array(0...4))
+    }
+    
+    func test_next_by_order_sequence() throws {
+        for i in 8...550 {
+            self.test_next_by_order(list: Array(0..<i))
+        }
+    }
+    
+    private func test_next_by_order(list: [Int]) {
+        let tree = RBTree(empty: 0, array: list)
+        var nIndex = tree.firstByOrder()
+        
+        var ordered = [Int]()
+        while nIndex != .empty {
+            ordered.append(tree[nIndex].value)
+            nIndex = tree.nextByOrder(index: nIndex)
+        }
+        
+        XCTAssertEqual(ordered, list)
     }
     
 }
