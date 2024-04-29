@@ -182,7 +182,7 @@ public extension RBTree {
         if this.right != .empty {
             return self.findLeftMinimum(this.right)
         } else {
-            // first perent bigger
+            // first parent bigger
             var i = this.parent
             while i != .empty {
                 if self[i].value > this.value {
