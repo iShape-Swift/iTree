@@ -165,15 +165,7 @@ public struct RBTree<T: Comparable> {
     @inlinable
     public mutating func insertIfNotExist(value: T) -> Bool {
         guard self.root != .empty else {
-            let newIndex = self.store.getFreeIndex()
-            var newNode = self[newIndex]
-            newNode.parent = .empty
-            newNode.left = .empty
-            newNode.right = .empty
-            newNode.color = .black
-            newNode.value = value
-            self[newIndex] = newNode
-            self.root = newIndex
+            self.insertRoot(value: value)
             return true
         }
         
@@ -201,19 +193,11 @@ public struct RBTree<T: Comparable> {
         
         return true
     }
-    
+
     @inlinable
     public mutating func insert(value: T) {
         guard self.root != .empty else {
-            let newIndex = self.store.getFreeIndex()
-            var newNode = self[newIndex]
-            newNode.parent = .empty
-            newNode.left = .empty
-            newNode.right = .empty
-            newNode.color = .black
-            newNode.value = value
-            self[newIndex] = newNode
-            self.root = newIndex
+            self.insertRoot(value: value)
             return
         }
         
@@ -236,6 +220,19 @@ public struct RBTree<T: Comparable> {
         } while index != .empty
         
         _ = self.insert(value: value, pIndex: pIndex, isLeft: isLeft)
+    }
+    
+    @inlinable
+    public mutating func insertRoot(value: T) {
+        let newIndex = self.store.getFreeIndex()
+        var newNode = self[newIndex]
+        newNode.parent = .empty
+        newNode.left = .empty
+        newNode.right = .empty
+        newNode.color = .black
+        newNode.value = value
+        self[newIndex] = newNode
+        self.root = newIndex
     }
     
     @inlinable
