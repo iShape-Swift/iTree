@@ -39,12 +39,16 @@ public extension RBTree {
             return
         }
         
+        var visited = [Bool](repeating: false, count: n)
+        
         let si = array.startIndex
         
         self.root = self.store.getFreeIndex()
         var rootNode = self.store.buffer[Int(self.root)]
         rootNode.color = .black
-        rootNode.value = array[si + (n >> 1)]
+        let mid = n >> 1
+        rootNode.value = array[si + mid]
+        visited[mid] = true
         self.store.buffer[Int(self.root)] = rootNode
         
         let log = (n + 1).logTwo - 1
@@ -85,17 +89,15 @@ public extension RBTree {
                 s += n
                 
                 j += 2
+                
+                visited[lt] = true
+                visited[rt] = true
             }
         }
         
-        var s = s0
-        while j < n {
-            let index = s >> log
-            let a = array[si + index]
-            s += n
-            
-            if self.insertIfNotExist(value: a) {
-                j += 1
+        for i in 0..<visited.count {
+            if !visited[i] {
+                self.insert(value: array[si + i])
             }
         }
     }
@@ -173,7 +175,11 @@ public extension RBTree {
     
     @inlinable
     func firstByOrder() -> UInt32 {
-        self.findLeftMinimum(self.root)
+        if root != .empty {
+            return self.findLeftMinimum(self.root)
+        } else {
+            return .empty
+        }
     }
     
     @inlinable

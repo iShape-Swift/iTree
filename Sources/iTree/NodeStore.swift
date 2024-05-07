@@ -18,6 +18,7 @@ public struct NodeStore<T> {
     init(empty: T, capacity: Int) {
         self.empty = empty
         self.buffer = [TreeNode]()
+        let capacity = max(8, capacity)
         self.buffer.reserveCapacity(capacity)
         self.unused = [UInt32]()
         self.unused.reserveCapacity(capacity)
@@ -27,7 +28,8 @@ public struct NodeStore<T> {
     @inlinable
     public mutating func getFreeIndex() -> UInt32 {
         if unused.isEmpty {
-            self.reserve(length: 16)
+            let extra_capacity = self.unused.capacity >> 1
+            self.reserve(length: extra_capacity)
         }
         return self.unused.removeLast()
     }
