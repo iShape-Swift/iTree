@@ -183,6 +183,15 @@ public extension RBTree {
     }
     
     @inlinable
+    func lastByOrder() -> UInt32 {
+        if root != .empty {
+            return self.findRightMinimum(self.root)
+        } else {
+            return .empty
+        }
+    }
+    
+    @inlinable
     func nextByOrder(index: UInt32) -> UInt32 {
         let this = self[index]
         if this.right != .empty {

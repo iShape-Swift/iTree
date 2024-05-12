@@ -571,6 +571,16 @@ public struct RBTree<T: Comparable> {
     }
     
     @inlinable
+    func findRightMinimum(_ nIndex: UInt32) -> UInt32 {
+        var i = nIndex
+        while self[i].right != .empty {
+            i = self[i].right
+        }
+        
+        return i
+    }
+    
+    @inlinable
     public func find(value: T) -> T? {
         var index = root
         
